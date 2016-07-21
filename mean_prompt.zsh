@@ -92,6 +92,9 @@ for cur ($split[1,-2]) {
   return 0
 }
 
+function prompt_mean_insert_mode () { echo "-- INSERT --" }
+function prompt_mean_normal_mode () { echo "-- NORMAL --" }
+
 prompt_mean_precmd() {
     vcs_info
     rehash
@@ -112,8 +115,14 @@ prompt_mean_precmd() {
         vcsinfo="%F{cyan}$vcs_info_msg_0_%F{magenta}`prompt_mean_git_dirty` "
     fi
 
+    case ${KEYMAP} in
+      (vicmd)      VI_MODE="%F{blue}$(prompt_mean_normal_mode)" ;;
+      (main|viins) VI_MODE="%F{2}$(prompt_mean_insert_mode)" ;;
+      (*)          VI_MODE="%F{2}$(prompt_mean_insert_mode)" ;;
+    esac
+
     PROMPT="$prompt_mean_jobs%F{yellow}$prompt_mean_tmux `prompt_mean_cmd_exec_time`%f%F{blue}`prompt_short_pwd` %B%F{1}❯%(?.%F{3}.%B%F{red})❯%(?.%F{2}.%B%F{red})❯%f%b "
-    RPROMPT="$vcsinfo%F{yellow}λ$prompt_mean_host%f"
+    RPROMPT="$VI_MODE $vcsinfo%F{yellow}λ$prompt_mean_host%f"
 
     unset cmd_timestamp # reset value since `preexec` isn't always triggered
 }
@@ -135,5 +144,13 @@ prompt_mean_setup() {
     prompt_mean_host=" %F{cyan}%m%f"
     [[ "$TMUX" != '' ]] && prompt_mean_tmux=$PROMPT_MEAN_TMUX
 }
+
+function zle-line-init zle-keymap-select {
+    prompt_mean_precmd
+    zle reset-prompt
+}
+
+zle -N zle-line-init
+zle -N zle-keymap-select
 
 prompt_mean_setup "$@"
