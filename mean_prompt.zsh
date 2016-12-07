@@ -7,6 +7,8 @@
 # MIT License
 
 PROMPT_MEAN_TMUX=${PROMPT_MEAN_TMUX-"t"}
+PROMPT_MEAN_GIT_DIRTY_CHECK=${PROMPT_MEAN_GIT_DIRTY_CHECK-"fast"}
+PROMPT_LEAN_MAGIC_ENTER=${PROMPT_LEAN_MAGIC_ENTER-"yes"}
 
 # turns seconds into human readable time, 165392 => 1d 21h 56m 32s
 prompt_mean_human_time() {
@@ -25,9 +27,15 @@ prompt_mean_human_time() {
 prompt_mean_git_dirty() {
     # check if we're in a git repo
     command git rev-parse --is-inside-work-tree &>/dev/null || return
-    # check if it's dirty
-    local umode="-uno" #|| local umode="-unormal"
-    command test -n "$(git status --porcelain --ignore-submodules ${umode} 2>/dev/null | head -100)"
+
+    if [[ $PROMPT_MEAN_GIT_DIRTY_CHECK == "fast" ]]; then
+        # check if directory is dirty (fastest method, doesn't include untracked files :( )
+        ! git diff-files --no-ext-diff --quiet || git diff-index --no-ext-diff --quiet --cached HEAD
+    else
+        # check if directory is dirty (slower method, includes tracked files)
+        local umode="-uno" #|| local umode="-unormal"
+        command test -n "$(git status --porcelain --ignore-submodules ${umode} 2>/dev/null | head -100)"
+    fi
 
     (($? == 0)) && echo '✱'
 }
@@ -92,6 +100,20 @@ for cur ($split[1,-2]) {
   return 0
 }
 
+# magic enter: if no command is written, hitting enter will display some info
+function lean_magic_enter {
+  if [ -z "$BUFFER" ]; then
+
+    local output="$(date)\t$(hostname)"
+
+    printf "$output\n"
+
+    zle redisplay
+  else
+    zle accept-line
+  fi
+}
+
 function prompt_mean_insert_mode () { echo "-- INSERT --" }
 function prompt_mean_normal_mode () { echo "-- NORMAL --" }
 
@@ -143,6 +165,11 @@ prompt_mean_setup() {
 
     prompt_mean_host=" %F{cyan}%m%f"
     [[ "$TMUX" != '' ]] && prompt_mean_tmux=$PROMPT_MEAN_TMUX
+
+    if [ "$PROMPT_LEAN_MAGIC_ENTER" = "yes" ]; then
+        zle -N lean_magic_enter
+        bindkey "^M" lean_magic_enter
+    fi
 }
 
 function zle-line-init zle-keymap-select {
