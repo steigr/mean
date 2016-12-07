@@ -7,7 +7,6 @@
 # MIT License
 
 PROMPT_MEAN_TMUX=${PROMPT_MEAN_TMUX-"t"}
-PROMPT_MEAN_GIT_DIRTY_CHECK=${PROMPT_MEAN_GIT_DIRTY_CHECK-"fast"}
 PROMPT_LEAN_MAGIC_ENTER=${PROMPT_LEAN_MAGIC_ENTER-"yes"}
 
 # turns seconds into human readable time, 165392 => 1d 21h 56m 32s
@@ -28,16 +27,8 @@ prompt_mean_git_dirty() {
     # check if we're in a git repo
     command git rev-parse --is-inside-work-tree &>/dev/null || return
 
-    if [[ $PROMPT_MEAN_GIT_DIRTY_CHECK == "fast" ]]; then
-        # check if directory is dirty (fastest method, doesn't include untracked files :( )
-        ! git diff-files --no-ext-diff --quiet || git diff-index --no-ext-diff --quiet --cached HEAD
-    else
-        # check if directory is dirty (slower method, includes tracked files)
-        local umode="-uno" #|| local umode="-unormal"
-        command test -n "$(git status --porcelain --ignore-submodules ${umode} 2>/dev/null | head -100)"
-    fi
-
-    (($? == 0)) && echo '✱'
+    git diff-files --no-ext-diff --quiet && git diff-index --no-ext-diff --quiet --cached HEAD
+    (($? != 0)) && echo '✱'
 }
 
 # displays the exec time of the last command if set threshold was exceeded
