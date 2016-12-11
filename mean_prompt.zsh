@@ -7,7 +7,6 @@
 # MIT License
 
 PROMPT_MEAN_TMUX=${PROMPT_MEAN_TMUX-"t"}
-PROMPT_LEAN_MAGIC_ENTER=${PROMPT_LEAN_MAGIC_ENTER-"yes"}
 
 # turns seconds into human readable time, 165392 => 1d 21h 56m 32s
 prompt_mean_human_time() {
@@ -25,7 +24,7 @@ prompt_mean_human_time() {
 # fastest possible way to check if repo is dirty
 prompt_mean_git_dirty() {
     # check if we're in a git repo
-    command git rev-parse --is-inside-work-tree &>/dev/null || return
+    command git show-ref --head &>/dev/null || return
 
     git diff-files --no-ext-diff --quiet && git diff-index --no-ext-diff --quiet --cached HEAD
     (($? != 0)) && echo '✱'
@@ -91,25 +90,10 @@ for cur ($split[1,-2]) {
   return 0
 }
 
-# magic enter: if no command is written, hitting enter will display some info
-function lean_magic_enter {
-  if [ -z "$BUFFER" ]; then
-
-    local output="$(date)\t$(hostname)"
-
-    printf "$output\n"
-
-    zle redisplay
-  else
-    zle accept-line
-  fi
-}
-
 function prompt_mean_insert_mode () { echo "-- INSERT --" }
 function prompt_mean_normal_mode () { echo "-- NORMAL --" }
 
 prompt_mean_precmd() {
-    vcs_info
     rehash
 
     local jobs
@@ -123,9 +107,11 @@ prompt_mean_precmd() {
     prompt_mean_jobs=""
     [[ -n $jobs ]] && prompt_mean_jobs="%F{242}["${(j:,:)jobs}"] "
 
-    vcsinfo=" "
-    if [[ !  -z  $vcs_info_msg_0_  ]] then
-        vcsinfo="%F{cyan}$vcs_info_msg_0_%F{magenta}`prompt_mean_git_dirty` "
+    vcsinfo="$(git symbolic-ref --short HEAD 2>/dev/null)"
+    if [[ !  -z  $vcsinfo  ]] then
+        vcsinfo="%F{cyan}$vcsinfo%F{magenta}`prompt_mean_git_dirty` "
+    else
+        vcsinfo=" "
     fi
 
     case ${KEYMAP} in
@@ -145,22 +131,12 @@ prompt_mean_setup() {
 
     zmodload zsh/datetime
     autoload -Uz add-zsh-hook
-    autoload -Uz vcs_info
 
     add-zsh-hook precmd prompt_mean_precmd
     add-zsh-hook preexec prompt_mean_preexec
 
-    zstyle ':vcs_info:*' enable git
-    zstyle ':vcs_info:git*' formats ' %b'
-    zstyle ':vcs_info:git*' actionformats ' %b|%a'
-
     prompt_mean_host=" %F{cyan}%m%f"
     [[ "$TMUX" != '' ]] && prompt_mean_tmux=$PROMPT_MEAN_TMUX
-
-    if [ "$PROMPT_LEAN_MAGIC_ENTER" = "yes" ]; then
-        zle -N lean_magic_enter
-        bindkey "^M" lean_magic_enter
-    fi
 }
 
 function zle-line-init zle-keymap-select {
