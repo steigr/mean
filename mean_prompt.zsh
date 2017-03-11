@@ -24,9 +24,9 @@ prompt_mean_human_time() {
 # fastest possible way to check if repo is dirty
 prompt_mean_git_dirty() {
     # check if we're in a git repo
-    command git show-ref --head &>/dev/null || return
+    command git rev-parse --verify HEAD &>/dev/null || return
 
-    git diff-files --no-ext-diff --quiet && git diff-index --no-ext-diff --quiet --cached HEAD
+    git diff-files --no-ext-diff --quiet &>/dev/null && git diff-index --no-ext-diff --quiet --cached HEAD &>/dev/null
     (($? != 0)) && echo '✱'
 }
 
