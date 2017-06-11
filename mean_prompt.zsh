@@ -115,9 +115,18 @@ prompt_mean_precmd() {
     fi
 
     case ${KEYMAP} in
-      (vicmd)      VI_MODE="%F{blue}$(prompt_mean_normal_mode)" ;;
-      (main|viins) VI_MODE="%F{2}$(prompt_mean_insert_mode)" ;;
-      (*)          VI_MODE="%F{2}$(prompt_mean_insert_mode)" ;;
+      (vicmd)      
+        VI_MODE="%F{blue}$(prompt_mean_normal_mode)" 
+        printf "\e[1 q"
+        ;;
+      (main|viins) 
+        VI_MODE="%F{2}$(prompt_mean_insert_mode)" 
+        printf "\e[5 q"
+        ;;
+      (*)          
+        VI_MODE="%F{2}$(prompt_mean_insert_mode)" 
+        printf "\e[5 q"
+        ;;
     esac
 
     PROMPT="$prompt_mean_jobs%F{yellow}$prompt_mean_tmux `prompt_mean_cmd_exec_time`%f%F{blue}`prompt_short_pwd` %B%F{1}❯%(?.%F{3}.%B%F{red})❯%(?.%F{2}.%B%F{red})❯%f%b "
