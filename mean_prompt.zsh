@@ -109,7 +109,7 @@ prompt_mean_precmd() {
 
     vcsinfo="$(git symbolic-ref --short HEAD 2>/dev/null)"
     if [[ !  -z  $vcsinfo  ]] then
-        vcsinfo="%F{cyan}$vcsinfo%F{magenta}`prompt_mean_git_dirty` "
+        vcsinfo="%F{2}$vcsinfo%F{5}`prompt_mean_git_dirty` "
     else
         vcsinfo=" "
     fi
@@ -117,20 +117,20 @@ prompt_mean_precmd() {
     case ${KEYMAP} in
       (vicmd)      
         VI_MODE="%F{blue}$(prompt_mean_normal_mode)" 
-        printf "\e[1 q"
+        printf "\e[3 q"
         ;;
       (main|viins) 
         VI_MODE="%F{2}$(prompt_mean_insert_mode)" 
-        printf "\e[5 q"
+        printf "\e[1 q"
         ;;
       (*)          
         VI_MODE="%F{2}$(prompt_mean_insert_mode)" 
-        printf "\e[5 q"
+        printf "\e[1 q"
         ;;
     esac
 
-    PROMPT="$prompt_mean_jobs%F{yellow}$prompt_mean_tmux `prompt_mean_cmd_exec_time`%f%F{blue}`prompt_short_pwd` %B%F{1}❯%(?.%F{3}.%B%F{red})❯%(?.%F{2}.%B%F{red})❯%f%b "
-    RPROMPT="$VI_MODE $vcsinfo%F{yellow}λ$prompt_mean_host%f"
+    PROMPT="$prompt_mean_jobs%F{11}$prompt_mean_tmux `prompt_mean_cmd_exec_time`%f%F{blue}`prompt_short_pwd` %(?.%F{12}.%B%F{red})❯%(?.%F{5}.%B%F{red})❯%(?.%F{13}.%B%F{red})❯%f%b "
+    RPROMPT="$vcsinfo%F{12}λ$prompt_mean_host%f"
 
     unset cmd_timestamp # reset value since `preexec` isn't always triggered
 }
@@ -144,7 +144,7 @@ prompt_mean_setup() {
     add-zsh-hook precmd prompt_mean_precmd
     add-zsh-hook preexec prompt_mean_preexec
 
-    prompt_mean_host=" %F{cyan}%m%f"
+    prompt_mean_host=" %F{11}%m%f"
     [[ "$TMUX" != '' ]] && prompt_mean_tmux=$PROMPT_MEAN_TMUX
 }
 
