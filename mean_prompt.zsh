@@ -115,16 +115,16 @@ prompt_mean_precmd() {
     fi
 
     case ${KEYMAP} in
-      (vicmd)      
-        VI_MODE="%F{blue}$(prompt_mean_normal_mode)" 
+      (vicmd)
+        VI_MODE="%F{blue}$(prompt_mean_normal_mode)"
         printf "\e[3 q"
         ;;
-      (main|viins) 
-        VI_MODE="%F{2}$(prompt_mean_insert_mode)" 
+      (main|viins)
+        VI_MODE="%F{2}$(prompt_mean_insert_mode)"
         printf "\e[1 q"
         ;;
-      (*)          
-        VI_MODE="%F{2}$(prompt_mean_insert_mode)" 
+      (*)
+        VI_MODE="%F{2}$(prompt_mean_insert_mode)"
         printf "\e[1 q"
         ;;
     esac
@@ -145,7 +145,9 @@ prompt_mean_setup() {
     add-zsh-hook preexec prompt_mean_preexec
 
     prompt_mean_host=" %F{11}%m%f"
-    [[ "$TMUX" != '' ]] && prompt_mean_tmux=$PROMPT_MEAN_TMUX
+    if [[ "$TMUX" != '' ]]; then
+      prompt_mean_tmux=$PROMPT_MEAN_TMUX
+    fi
 }
 
 function zle-line-init zle-keymap-select {
