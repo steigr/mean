@@ -130,7 +130,7 @@ prompt_mean_precmd() {
     esac
 
     PROMPT="$prompt_mean_jobs%F{11}$prompt_mean_tmux `prompt_mean_cmd_exec_time`%f%F{blue}`prompt_short_pwd` %(?.%F{12}.%B%F{red})❯%(?.%F{5}.%B%F{red})❯%(?.%F{13}.%B%F{red})❯%f%b "
-    RPROMPT="$vcsinfo%F{12}λ$prompt_mean_host%f"
+    RPROMPT="$vcsinfo%F{12}λ$prompt_mean_host%f $(kube_ps1)"
 
     unset cmd_timestamp # reset value since `preexec` isn't always triggered
 }
